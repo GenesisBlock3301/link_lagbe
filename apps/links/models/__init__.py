@@ -1,0 +1,1 @@
+from .link_model import Link, LinkClick
