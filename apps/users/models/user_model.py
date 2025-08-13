@@ -1,5 +1,6 @@
 import jwt
 import datetime
+from typing import Dict, Any
 from django.db import models
 from django.db import transaction
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
@@ -7,23 +8,33 @@ from datetime import datetime, timedelta
 from apps.users.helpers import TokenConstants, UserGenderChoices
 from apps.common.models import BaseModel
 
+
 class UserManager(BaseUserManager):
 
-    def create_user(self, kw):
+    def create_user(self, kw: Dict[str, Any]) -> 'User':
         if not kw.get('email', None):
             raise TypeError('User must have an email.')
         with transaction.atomic():
             user = self.model(email=kw.get('email', None))
             user.set_password(kw.get('password', None))
             user.save()
-
-            first_name = kw.get('first_name', '')
-            last_name = kw.get('last_name', '')
             Profile.objects.create(
-                user=user,
-                first_name=first_name,
-                last_name=last_name,
+                user=user
             )
+        return user
+
+    def create_superuser(self, email: str, password: str) -> 'User':
+        if not email:
+            raise ValueError('Email must be specified!')
+
+        user = self.model(
+            email=self.normalize_email(email)
+        )
+        user.is_superuser = True
+        user.is_staff = True
+        user.is_active = True
+        user.set_password(password)
+        user.save()
         return user
 
 
@@ -37,10 +48,10 @@ class User(AbstractBaseUser, BaseModel):
 
     objects = UserManager()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.email or str(self.id)
 
-    def token(self, secret_key, remember_me=False):
+    def token(self, secret_key: str, remember_me: bool = False) -> str:
         if remember_me:
             exp_minutes = TokenConstants.access_token_expiry(remember_me)
         else:
@@ -48,7 +59,7 @@ class User(AbstractBaseUser, BaseModel):
         return self._generate_jwt_token(secret_key=secret_key, exp_minutes=exp_minutes)
 
     # Generate Refresh Token
-    def refresh_token(self, secret_key, remember_me=False):
+    def refresh_token(self, secret_key: str, remember_me: bool = False) -> str:
         if remember_me:
             exp_days = TokenConstants.refresh_token_expiry(remember_me)
         else:
@@ -56,7 +67,7 @@ class User(AbstractBaseUser, BaseModel):
 
         return self._generate_jwt_token(secret_key=secret_key, exp_days=exp_days)
 
-    def _generate_jwt_token(self, secret_key, exp_minutes=None, exp_days=None):
+    def _generate_jwt_token(self, secret_key: str, exp_minutes: int = None, exp_days: int = None) -> str:
         iat_dt = datetime.now()
         algorithm = TokenConstants.algorithm()
 
@@ -104,7 +115,7 @@ class Profile(BaseModel):
         return self.name
 
     @property
-    def name(self):
+    def name(self) -> str:
         return f'{self.first_name} {self.last_name}'.strip() or "No Name Provided"
 
     class Meta:
