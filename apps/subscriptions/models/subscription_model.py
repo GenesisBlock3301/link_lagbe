@@ -15,3 +15,7 @@ class Subscription(BaseModel):
     def __str__(self):
         return f"{self.user.email} - {self.status} ({self.plan})"
 
+    class Meta:
+        db_table = 'link_lagbe_subscription'
+        ordering = ('-created_at',)
+

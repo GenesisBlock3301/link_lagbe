@@ -11,16 +11,15 @@ from apps.common.models import BaseModel
 
 class UserManager(BaseUserManager):
 
-    def create_user(self, kw: Dict[str, Any]) -> 'User':
+    def create_user(self, **kw: Dict[str, Any]) -> 'User':
         if not kw.get('email', None):
             raise TypeError('User must have an email.')
         with transaction.atomic():
             user = self.model(email=kw.get('email', None))
             user.set_password(kw.get('password', None))
+            user.is_active = kw.get('is_active', False)
             user.save()
-            Profile.objects.create(
-                user=user
-            )
+            Profile.objects.create(user=user)
         return user
 
     def create_superuser(self, email: str, password: str) -> 'User':
@@ -94,7 +93,7 @@ class User(AbstractBaseUser, BaseModel):
         return token
 
     class Meta:
-        db_table = 'link_user'
+        db_table = 'link_lagbe_user'
         constraints = [
             models.UniqueConstraint(fields=['email'], name='unique_email'),
         ]

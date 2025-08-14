@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import LoginAPIView
+from .views import LoginAPIView, SignupAPIView, VerifyEmailAPIView
 
 
 urlpatterns = [
-    # path('activate/<uid64>/<token>/', activate, name='activate'),
+    path('signup/', SignupAPIView.as_view(), name='signup'),
     path('login/', LoginAPIView.as_view(), name='user_login'),
+    path('verify-email/<uidb64>/<token>/', VerifyEmailAPIView.as_view(), name='verify-email'),
 ]

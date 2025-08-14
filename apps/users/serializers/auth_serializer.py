@@ -4,8 +4,13 @@ from typing import Dict, Any
 from django.db import transaction
 from django.conf import settings
 from rest_framework import serializers
+
+from apps.common.exceptions import UserAlreadyExists
 from apps.users.backend import CustomAuthBackend
 from apps.users.models import User
+from apps.users.tasks import send_verification_email_task
+
+logger = logging.getLogger(__name__)
 
 
 class UserSignupSerializer(serializers.Serializer):
@@ -16,19 +21,25 @@ class UserSignupSerializer(serializers.Serializer):
         if self.instance:
             if 'email' in data and self.instance.email != data['email']:
                 if User.objects.filter(email=data['email']).exists():
-                    raise serializers.ValidationError("A user with this email already exists.")
+                    logger.info(f"User with email {data['email']} already exists.")
+                    raise UserAlreadyExists()
         else:
             if 'email' in data and User.objects.filter(email=data['email']).exists():
-                raise serializers.ValidationError("A user with this email already exists.")
+                logger.info(f"User with email {data['email']} already exists.")
+                raise UserAlreadyExists()
 
         return data
 
     def create(self, validated_data: Dict[str, Any]) -> 'User':
         user = User.objects.create_user(
             email=validated_data['email'],
-            password=validated_data['password']
+            password=validated_data['password'],
+            is_active=False,
         )
         user.save()
+        request = self.context.get('request')
+        domain = request.get_host()
+        send_verification_email_task.delay(user.id, domain)
         return user
 
     def update(self, instance: 'User', validated_data: Dict[str, Any]):
@@ -53,6 +64,7 @@ class AuthenticationSerializer(serializers.Serializer):
         user = CustomAuthBackend().authenticate(email=email, password=password)
 
         if user is None:
+            logger.info(f"Invalid credentials for user with email {email}.")
             raise serializers.ValidationError("Invalid credentials.")
 
         self.context['user'] = user

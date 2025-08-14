@@ -1,34 +1,34 @@
 import logging
 
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import get_object_or_404
+
 from rest_framework.permissions import AllowAny
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+
 from apps.users.serializers.auth_serializer import AuthenticationSerializer, UserSignupSerializer
 from apps.users.docs import swagger_login, swagger_register
+from apps.users.models import User
+from apps.common.views import BaseAPIView as APIView
 
 logger = logging.getLogger(__name__)
 
 
-class UserSignupAPIView(APIView):
+class SignupAPIView(APIView):
+    permission_classes = (AllowAny,)
     serializer_class = UserSignupSerializer
 
     @swagger_register
     def post(self, request):
-        try:
-            data = request.data
-            serializer = self.serializer_class(data=data)
-            serializer.is_valid(raise_exception=True)
-            user = serializer.save()
-            return Response({
-                'message': 'Account created successfully',
-                'user_id': user.id,
-            }, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            logger.error(str(e))
-            return Response({
-                'message': str(e),
-            }, status=status.HTTP_400_BAD_REQUEST)
+        data = request.data
+        serializer = self.serializer_class(data=data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({
+            'message': 'User created successfully'
+        }, status=status.HTTP_201_CREATED)
 
 
 class LoginAPIView(APIView):
@@ -37,10 +37,19 @@ class LoginAPIView(APIView):
 
     @swagger_login
     def post(self, request):
-        try:
-            serializer = self.serializer_class(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            logger.error(str(e))
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class VerifyEmailAPIView(APIView):
+    def get(self, request, uidb64, token):
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = get_object_or_404(User, pk=uid)
+        if default_token_generator.check_token(user, token):
+            user.is_active = True
+            user.save()
+            return Response({"message": "Email verified successfully!"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
+

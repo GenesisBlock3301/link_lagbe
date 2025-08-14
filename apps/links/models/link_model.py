@@ -8,13 +8,16 @@ class Link(BaseModel):
     title = models.CharField(max_length=100)
     url = models.URLField()
     order = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     def click_count(self):
         return self.clicks.count()
 
     def __str__(self):
         return f"{self.title} ({self.user.username})"
+
+    class Meta:
+        db_table = 'link_lagbe_link'
+        ordering = ('-created_at',)
 
 
 class LinkClick(BaseModel):
@@ -24,3 +27,7 @@ class LinkClick(BaseModel):
 
     def __str__(self):
         return f"Click on {self.link.title} at {self.clicked_at}"
+
+    class Meta:
+        db_table = 'link_lagbe_link_click'
+        ordering = ('-created_at',)
