@@ -13,7 +13,7 @@ def send_verification_email_task(user_id, domain):
 
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
-    verification_link = f"http://{domain}/verify-email/{uid}/{token}/"
+    verification_link = f"http://{domain}/users/verify-email/{uid}/{token}/"
 
     subject = "Verify your email address"
     message = f"Hello {user.email},\n\nPlease click the link below to verify your account:\n{verification_link}"

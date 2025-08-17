@@ -12,6 +12,7 @@ dependencies = [
     "djangorestframework>=3.16.1",
     "drf-yasg>=1.21.10",
     "pyjwt>=2.10.1",
+    "redis>=6.4.0",
 ]
 
 [dependency-groups]

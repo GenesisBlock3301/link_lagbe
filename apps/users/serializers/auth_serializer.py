@@ -31,15 +31,21 @@ class UserSignupSerializer(serializers.Serializer):
         return data
 
     def create(self, validated_data: Dict[str, Any]) -> 'User':
-        user = User.objects.create_user(
-            email=validated_data['email'],
-            password=validated_data['password'],
-            is_active=False,
-        )
-        user.save()
         request = self.context.get('request')
         domain = request.get_host()
-        send_verification_email_task.delay(user.id, domain)
+
+        with transaction.atomic():
+            user = User.objects.create_user(
+                email=validated_data['email'],
+                password=validated_data['password'],
+                is_active=False,
+            )
+            user.save()
+            try:
+                send_verification_email_task(user.id, domain)  # call a sync function here
+            except Exception as e:
+                raise serializers.ValidationError("Failed to send verification email")  # rollback transaction
+
         return user
 
     def update(self, instance: 'User', validated_data: Dict[str, Any]):

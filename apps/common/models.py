@@ -12,3 +12,13 @@ class BaseModel(models.Model):
         ordering = ['-created_at']
 
 
+
+
+class FlaggedModel(models.Model):
+    is_deleted = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
+
+

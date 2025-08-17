@@ -1,12 +1,10 @@
 import jwt
-import datetime
 from typing import Dict, Any
-from django.db import models
-from django.db import transaction
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.db import models, transaction
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from datetime import datetime, timedelta
 from apps.users.helpers import TokenConstants, UserGenderChoices
-from apps.common.models import BaseModel
+from apps.common.models import BaseModel, FlaggedModel
 
 
 class UserManager(BaseUserManager):
@@ -14,11 +12,14 @@ class UserManager(BaseUserManager):
     def create_user(self, **kw: Dict[str, Any]) -> 'User':
         if not kw.get('email', None):
             raise TypeError('User must have an email.')
+
         with transaction.atomic():
-            user = self.model(email=kw.get('email', None))
+            user = self.model(
+                email=self.normalize_email(kw.get('email'))
+            )
             user.set_password(kw.get('password', None))
             user.is_active = kw.get('is_active', False)
-            user.save()
+            user.save(using=self._db)
             Profile.objects.create(user=user)
         return user
 
@@ -27,43 +28,45 @@ class UserManager(BaseUserManager):
             raise ValueError('Email must be specified!')
 
         user = self.model(
-            email=self.normalize_email(email)
+            email=self.normalize_email(email),
+            is_superuser=True,
+            is_staff=True,
+            is_active=True,
         )
-        user.is_superuser = True
-        user.is_staff = True
-        user.is_active = True
         user.set_password(password)
-        user.save()
+        user.save(using=self._db)
         return user
 
 
-class User(AbstractBaseUser, BaseModel):
+class User(AbstractBaseUser, PermissionsMixin, BaseModel, FlaggedModel):
     email = models.EmailField(db_index=True, unique=True, max_length=150)
     password = models.CharField(max_length=128)
+
+    # Extra fields
     is_email_verified = models.BooleanField(default=False)
     is_premium = models.BooleanField(default=False)
 
+    # Required for admin
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
     USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
     objects = UserManager()
 
     def __str__(self) -> str:
         return self.email or str(self.id)
 
+    # Access Token
     def token(self, secret_key: str, remember_me: bool = False) -> str:
-        if remember_me:
-            exp_minutes = TokenConstants.access_token_expiry(remember_me)
-        else:
-            exp_minutes = TokenConstants.access_token_expiry()
+        exp_minutes = TokenConstants.access_token_expiry(remember_me)
         return self._generate_jwt_token(secret_key=secret_key, exp_minutes=exp_minutes)
 
-    # Generate Refresh Token
+    # Refresh Token
     def refresh_token(self, secret_key: str, remember_me: bool = False) -> str:
-        if remember_me:
-            exp_days = TokenConstants.refresh_token_expiry(remember_me)
-        else:
-            exp_days = TokenConstants.refresh_token_expiry()
-
+        exp_days = TokenConstants.refresh_token_expiry(remember_me)
         return self._generate_jwt_token(secret_key=secret_key, exp_days=exp_days)
 
     def _generate_jwt_token(self, secret_key: str, exp_minutes: int = None, exp_days: int = None) -> str:
