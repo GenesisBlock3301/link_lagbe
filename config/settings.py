@@ -206,7 +206,15 @@ LOGGING = {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "verbose",
-        }
+        },
+        # "file": {
+        #     "level": "INFO",
+        #     "class": "logging.handlers.RotatingFileHandler",
+        #     "filename": "logs/django_app.log",
+        #     "maxBytes": 10 * 1024 * 1024,  # 10 MB
+        #     # "backupCount": 5,  # Keep last 5 logs
+        #     "formatter": "verbose",
+        # },
     },
     "root": {"level": "INFO", "handlers": ["console"]},
 }
@@ -231,3 +239,14 @@ EMAIL_USE_SSL = False
 EMAIL_HOST_USER = env.str("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"{env.str('REDIS_PLATFORM_URL')}/{env.str('CELERY_BROKER_DB')}",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "TIMEOUT": 300,
+    }
+}
