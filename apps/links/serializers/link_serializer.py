@@ -19,3 +19,11 @@ class LinkSerializer(serializers.ModelSerializer):
         except DjangoValidationError:
             raise serializers.ValidationError("Enter a valid URL.")
         return value
+
+
+class UserLinkSerializer(serializers.ModelSerializer):
+    click_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Link
+        fields = ["id", "title", "url", "order", "click_count"]

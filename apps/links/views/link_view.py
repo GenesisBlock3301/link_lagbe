@@ -5,7 +5,7 @@ from apps.common.views import BaseAPIView as APIView
 from apps.links.models import Link
 from apps.links.serializers import LinkSerializer
 from apps.links.docs import (swagger_link_retrieve_response, swagger_link_list_response, swagger_link_create_response,
-                             swagger_link_update_response, swagger_link_delete_response)
+                             swagger_link_update_response, swagger_link_delete_response, swagger_link_order_response)
 
 
 class LinkListAPIView(APIView):
@@ -87,3 +87,61 @@ class LinkDeleteAPIView(APIView):
         link.is_deleted = True
         link.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class LinkOrderUpdateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_link_order_response
+    def patch(self, request, pk):
+        try:
+            link = request.user.links.get(pk=pk)
+        except Link.DoesNotExist:
+            return Response({"error": "Link not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        new_order = request.data.get("order")
+        if new_order is None:
+            return Response({"error": "Order field is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            new_order = int(new_order)
+        except ValueError:
+            return Response({"error": "Order must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+
+        link.order = new_order
+        link.save(update_fields=["order"])
+        return Response({"id": link.id, "order": link.order}, status=status.HTTP_200_OK)
+
+
+class LinkToggleUpdateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        summary="Toggle link active status",
+        description="Toggle a link's active state (enable/disable).",
+        parameters=[
+            OpenApiParameter("pk", int, OpenApiParameter.PATH, description="ID of the link"),
+        ],
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "integer"},
+                        "is_active": {"type": "boolean"},
+                    }
+                },
+                description="Link toggled successfully",
+            ),
+            404: OpenApiResponse(description="Link not found"),
+        },
+    )
+    def patch(self, request, pk):
+        try:
+            link = request.user.links.get(pk=pk)
+        except Link.DoesNotExist:
+            return Response({"error": "Link not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        link.is_active = not link.is_active
+        link.save(update_fields=["is_active"])
+        return Response({"id": link.id, "is_active": link.is_active}, status=status.HTTP_200_OK)

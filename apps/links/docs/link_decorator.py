@@ -7,7 +7,9 @@ from .link_schema import (
     LinkRetrieveResponseSchema,
     LinkUpdateRequestSchema,
     LinkUpdateResponseSchema,
-    LinkDeleteResponseSchema
+    LinkDeleteResponseSchema,
+    LinkOrderUpdateResponseSchema,
+    LinkOrderUpdateResponseSchema
 )
 
 # ---------------- List ----------------
@@ -49,4 +51,12 @@ def swagger_link_delete_response(func):
     return swagger_auto_schema(
         tags=['Links'],
         responses={status.HTTP_204_NO_CONTENT: LinkDeleteResponseSchema}
+    )(func)
+
+
+def swagger_link_order_response(func):
+    return swagger_auto_schema(
+        tags=['Links'],
+        request_body=LinkCreateRequestSchema,
+        responses=LinkOrderUpdateResponseSchema
     )(func)

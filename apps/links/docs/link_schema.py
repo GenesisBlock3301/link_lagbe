@@ -1,4 +1,5 @@
 from drf_yasg import openapi
+from rest_framework import status
 
 LinkSchema = openapi.Schema(
     type=openapi.TYPE_OBJECT,
@@ -80,3 +81,32 @@ LinkDeleteResponseSchema = openapi.Response(
         properties={"detail": openapi.Schema(type=openapi.TYPE_STRING, default="Link deleted successfully")}
     )
 )
+
+
+LinkOrderUpdateRequestSchema = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        "order": openapi.Schema(type=openapi.TYPE_INTEGER, description="Display order"),
+    }
+)
+
+LinkOrderUpdateResponseSchema = {
+    status.HTTP_200_OK: openapi.Response(
+        description="Link order updated successfully",
+        schema=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "message": openapi.Schema(type=openapi.TYPE_STRING, description="Message"),
+            }
+        )
+    ),
+    status.HTTP_400_BAD_REQUEST: openapi.Response(
+        description="Link order update failed",
+        schema=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "message": openapi.Schema(type=openapi.TYPE_STRING, description="Message"),
+            }
+        )
+    )
+}

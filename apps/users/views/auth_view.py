@@ -4,12 +4,12 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from apps.users.serializers.auth_serializer import AuthenticationSerializer, UserSignupSerializer
-from apps.users.docs import swagger_login, swagger_register
+from apps.users.serializers.auth_serializer import AuthenticationSerializer, UserSignupSerializer, UserMeSerializer
+from apps.users.docs import swagger_login, swagger_register, swagger_me
 from apps.users.models import User
 from apps.common.views import BaseAPIView as APIView
 
@@ -42,6 +42,21 @@ class LoginAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+class MeAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_me
+    def get(self, request):
+        user = (
+            User.objects
+            .select_related("profile")
+            .prefetch_related("links")
+            .get(pk=request.user.pk)
+        )
+        serializer = UserMeSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class VerifyEmailAPIView(APIView):
     def get(self, request, uidb64, token):
         uid = urlsafe_base64_decode(uidb64).decode()
@@ -52,4 +67,3 @@ class VerifyEmailAPIView(APIView):
             return Response({"message": "Email verified successfully!"}, status=status.HTTP_200_OK)
         else:
             return Response({"message": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
-

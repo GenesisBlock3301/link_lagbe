@@ -13,7 +13,7 @@ class Link(BaseModel):
         return self.clicks.count()
 
     def __str__(self):
-        return f"{self.title} ({self.user.username})"
+        return f"{self.title} ({self.user.email})"
 
     class Meta:
         db_table = 'link_lagbe_link'

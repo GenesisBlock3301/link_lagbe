@@ -7,8 +7,9 @@ from rest_framework import serializers
 
 from apps.common.exceptions import UserAlreadyExists
 from apps.users.backend import CustomAuthBackend
-from apps.users.models import User
+from apps.users.models import User, Profile
 from apps.users.tasks import send_verification_email_task
+from apps.links.serializers import UserLinkSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -85,3 +86,18 @@ class AuthenticationSerializer(serializers.Serializer):
             'refresh_token': user.refresh_token(secret_key=settings.JWT_TOKEN),
         }
         return data
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['first_name', 'last_name', 'date_of_birth', 'gender']
+
+
+class UserMeSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(read_only=True)
+    links = UserLinkSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'is_premium', 'is_active', 'profile', 'links']
