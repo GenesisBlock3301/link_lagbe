@@ -116,26 +116,7 @@ class LinkOrderUpdateView(APIView):
 class LinkToggleUpdateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    @extend_schema(
-        summary="Toggle link active status",
-        description="Toggle a link's active state (enable/disable).",
-        parameters=[
-            OpenApiParameter("pk", int, OpenApiParameter.PATH, description="ID of the link"),
-        ],
-        responses={
-            200: OpenApiResponse(
-                response={
-                    "type": "object",
-                    "properties": {
-                        "id": {"type": "integer"},
-                        "is_active": {"type": "boolean"},
-                    }
-                },
-                description="Link toggled successfully",
-            ),
-            404: OpenApiResponse(description="Link not found"),
-        },
-    )
+    @swagger_link_update_response
     def patch(self, request, pk):
         try:
             link = request.user.links.get(pk=pk)
