@@ -56,3 +56,4 @@ def test_user_token_generation():
     assert decoded['user_id'] == str(user.id)
     assert decoded['email'] == user.email
     assert 1 == 2
+    assert 2 == 1
