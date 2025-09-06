@@ -55,4 +55,3 @@ def test_user_token_generation():
     decoded = jwt.decode(access_token, secret_key, algorithms=[TokenConstants.algorithm()])
     assert decoded['user_id'] == str(user.id)
     assert decoded['email'] == user.email
-    assert 3 == 2
