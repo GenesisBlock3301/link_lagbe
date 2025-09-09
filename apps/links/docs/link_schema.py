@@ -82,7 +82,6 @@ LinkDeleteResponseSchema = openapi.Response(
     )
 )
 
-
 LinkOrderUpdateRequestSchema = openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={

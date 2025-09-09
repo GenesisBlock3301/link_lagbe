@@ -95,6 +95,17 @@ if 'pytest' in sys.argv[0]:  # Detect pytest
             'NAME': ':memory:',
         }
     }
+elif os.getenv('ENV') == 'development':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': "link_lagbe",
+            'USER': "postgres",
+            'PASSWORD': "123456",
+            'HOST': "localhost",
+            'PORT': 5432,
+        }
+    }
 else:
     DATABASES = {
         'default': {
@@ -263,3 +274,5 @@ CACHES = {
         "TIMEOUT": 300,
     }
 }
+
+SWAGGER_USE_COMPAT_RENDERERS = False

@@ -5,7 +5,7 @@ from apps.links.models import Link
 
 
 class LinkSerializer(serializers.ModelSerializer):
-    click_count = serializers.IntegerField(source='click_count', read_only=True)
+    click_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Link

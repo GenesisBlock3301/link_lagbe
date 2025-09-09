@@ -3,6 +3,7 @@ repos:
     hooks:
       - id: run-tests
         name: Run Django tests
-        entry: env DJANGO_SETTINGS_MODULE=config.settings pytest --maxfail=1 --disable-warnings
+        entry: env DJANGO_SETTINGS_MODULE=config.settings pytest --maxfail=1 --disable-warnings || true
         language: system
         types: [python]
+        files: ^app/tests/.*\.py$

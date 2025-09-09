@@ -1,3 +1,6 @@
+import time
+
+from django.db.models import Count
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ValidationError
@@ -14,7 +17,12 @@ class LinkListAPIView(APIView):
 
     @swagger_link_list_response
     def get(self, request):
-        queryset = Link.objects.filter(user=request.user)
+        start = time.time()
+        queryset = Link.objects.annotate(
+            click_count=Count('clicks'),
+        ).filter(user=request.user)
+        end = time.time()
+        print(end - start)
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
 

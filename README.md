@@ -2,8 +2,10 @@
 
 ## Test Django APP
 
-### Unit testing
+### 1s day
 pytest
+setup pre-commit
+Docker setup
 
 ### Load or stress testing
 
