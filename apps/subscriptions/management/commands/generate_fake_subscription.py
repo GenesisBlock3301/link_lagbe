@@ -6,7 +6,7 @@ from faker import Faker
 
 from apps.subscriptions.helpers import StatusChoices, PlanChoices
 from apps.subscriptions.models import Subscription
-from apps.users.models import User, Profile
+from apps.users.models import User
 import time
 
 

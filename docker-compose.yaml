@@ -57,6 +57,15 @@ services:
     volumes:
       - .:/app
 
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - link_lagbe
+
 volumes:
   postgres_data:
 
