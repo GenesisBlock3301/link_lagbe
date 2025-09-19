@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: link-lagbe-ingress
+  namespace: linklagbe
+spec:
+  rules:
+    - host: link-lagbe.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: link-lagbe
+                port:
+                  number: 8000

@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: linklagbe
+data:
+  default.conf: |
+    upstream django {
+        server link-lagbe:8000;  # must match your Django Service name
+    }
+
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://django;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+        }
+
+        location /static/ {
+            alias /app/staticfiles/;  # must match volume mount in Django Deployment
+        }
+    }
