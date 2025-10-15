@@ -5,16 +5,16 @@ LinkSchema = openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
         "id": openapi.Schema(type=openapi.TYPE_INTEGER, description="Link ID"),
-        "title": openapi.Schema(type=openapi.TYPE_STRING, description="Link title"),
-        "url": openapi.Schema(type=openapi.TYPE_STRING, description="Link URL"),
-        "order": openapi.Schema(type=openapi.TYPE_INTEGER, description="Display order"),
+        "title": openapi.Schema(type=openapi.TYPE_STRING, description="title"),
+        "url": openapi.Schema(type=openapi.TYPE_STRING, description="URL"),
+        "order": openapi.Schema(type=openapi.TYPE_INTEGER, description="order"),
         "click_count": openapi.Schema(type=openapi.TYPE_INTEGER, description="Number of clicks"),
         "created_at": openapi.Schema(type=openapi.FORMAT_DATETIME, description="Creation timestamp"),
     },
     required=["id", "title", "url"]
 )
 
-# Response schema for list of links
+# Response schema for a list of links
 LinkListResponseSchema = openapi.Response(
     description="List of links",
     schema=openapi.Schema(
@@ -29,7 +29,7 @@ LinkCreateRequestSchema = openapi.Schema(
     properties={
         "title": openapi.Schema(type=openapi.TYPE_STRING, description="Link title", default="My Link"),
         "url": openapi.Schema(type=openapi.TYPE_STRING, description="Link URL", default="https://example.com"),
-        "order": openapi.Schema(type=openapi.TYPE_INTEGER, description="Display order", default=0),
+        "order": openapi.Schema(type=openapi.TYPE_INTEGER, description="order", default=0),
     },
     required=["title", "url"]
 )

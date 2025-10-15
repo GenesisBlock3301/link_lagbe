@@ -43,9 +43,9 @@ class UserSignupSerializer(serializers.Serializer):
             )
             user.save()
             try:
-                send_verification_email_task(user.id, domain)  # call a sync function here
-            except Exception as e:
-                raise serializers.ValidationError("Failed to send verification email")  # rollback transaction
+                send_verification_email_task(user.id, domain)
+            except Exception:
+                raise serializers.ValidationError("Failed to send verification email")
 
         return user
 

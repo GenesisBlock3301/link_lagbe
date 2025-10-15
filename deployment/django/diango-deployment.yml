@@ -13,6 +13,7 @@ spec:
       labels:
         app: link-lagbe
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: django
           image: genesisblock1033/linkg_lagbe:v3
@@ -32,6 +33,15 @@ spec:
               python3 manage.py collectstatic --noinput && \
               python3 manage.py migrate && \
               gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers=4 --threads=2 --timeout=120
+          resources:
+            requests:
+              cpu: "250m"                  # 0.25 CPU core guaranteed
+              memory: "512Mi"              # 512 MB guaranteed
+              ephemeral-storage: "512Mi"   # Disk buffer for temp/static files
+            limits:
+              cpu: "500m"                  # Max 0.5 CPU core
+              memory: "1Gi"                # Max 1 GB
+              ephemeral-storage: "1Gi"     # Max temporary storage allowed
       volumes:
         - name: static-volume
-          emptyDir: {}   # Ephemeral storage for static files
+          emptyDir: {}                     # Ephemeral volume for static files

@@ -109,9 +109,9 @@ class Profile(BaseModel):
     first_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255, blank=True)
     date_of_birth = models.DateField(blank=True, null=True)
-    gender = models.CharField(max_length=16, choices=UserGenderChoices.choices, blank=True, null=True)
-    image_url = models.CharField(blank=True, null=True, max_length=512)
-    s3_key = models.CharField(blank=True, null=True, max_length=255)
+    gender = models.CharField(max_length=16, choices=UserGenderChoices.choices, blank=True, default="")
+    image_url = models.CharField(blank=True, max_length=512, default="")
+    s3_key = models.CharField(blank=True, max_length=255, default="")
 
     def __str__(self):
         return self.name

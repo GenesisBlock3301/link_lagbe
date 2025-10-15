@@ -40,6 +40,7 @@ def response_schema(message: str):
         }
     )
 
+OTP_NOT_FOUND_RESPONSE = "OTP not found"
 
 SendOtpResponses = {
     status.HTTP_200_OK: openapi.Response(
@@ -51,8 +52,8 @@ SendOtpResponses = {
         schema=response_schema("Email does not exist or invalid")
     ),
     status.HTTP_404_NOT_FOUND: openapi.Response(
-        description="OTP not found",
-        schema=response_schema("OTP not found")
+        description=OTP_NOT_FOUND_RESPONSE,
+        schema=response_schema(OTP_NOT_FOUND_RESPONSE)
     )
 }
 
@@ -66,8 +67,8 @@ VerifyOtpResponses = {
         schema=response_schema("Invalid or expired OTP")
     ),
     status.HTTP_404_NOT_FOUND: openapi.Response(
-        description="OTP not found",
-        schema=response_schema("OTP not found")
+        description=OTP_NOT_FOUND_RESPONSE,
+        schema=response_schema(OTP_NOT_FOUND_RESPONSE)
     )
 }
 
@@ -81,7 +82,7 @@ ResetPasswordResponses = {
         schema=response_schema("Invalid OTP or input")
     ),
     status.HTTP_404_NOT_FOUND: openapi.Response(
-        description="OTP not found",
-        schema=response_schema("OTP not found")
+        description=OTP_NOT_FOUND_RESPONSE,
+        schema=response_schema(OTP_NOT_FOUND_RESPONSE)
     )
 }

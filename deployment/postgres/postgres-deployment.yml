@@ -13,6 +13,7 @@ spec:
       labels:
         app: postgres
     spec:
+      automountServiceAccountToken: false  # ✅ Disable unused service account
       containers:
         - name: postgres
           image: postgres:17
@@ -24,6 +25,20 @@ spec:
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: "250m"                  # Reserve 0.25 CPU
+              memory: "512Mi"              # Reserve 512 MB RAM
+              ephemeral-storage: "512Mi"   # Temporary disk usage
+            limits:
+              cpu: "1"                     # Cap at 1 CPU
+              memory: "1Gi"                # Cap at 1 GB RAM
+              ephemeral-storage: "1Gi"     # Cap temporary disk usage
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false  # PostgreSQL needs write access
+            runAsNonRoot: true
+            runAsUser: 999                 # Default 'postgres' user in container
       volumes:
         - name: postgres-data
           persistentVolumeClaim:

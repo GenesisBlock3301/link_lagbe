@@ -8,7 +8,6 @@ from .link_schema import (
     LinkUpdateRequestSchema,
     LinkUpdateResponseSchema,
     LinkDeleteResponseSchema,
-    LinkOrderUpdateResponseSchema,
     LinkOrderUpdateResponseSchema
 )
 

@@ -52,6 +52,6 @@ def test_user_token_generation():
 
     # Optional: decode JWT to verify payload
     import jwt
-    decoded = jwt.decode(access_token, secret_key, algorithms=[TokenConstants.algorithm()])
+    decoded = jwt.decode(access_token, secret_key, algorithms=[TokenConstants._algorithm()])
     assert decoded['user_id'] == str(user.id)
     assert decoded['email'] == user.email

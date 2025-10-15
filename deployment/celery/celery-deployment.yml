@@ -13,13 +13,22 @@ spec:
       labels:
         app: celery
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: celery
           image: genesisblock1033/linkg_lagbe:latest
-          command:  ["celery", "-A", "config", "worker", "-l", "info"]
+          command: ["celery", "-A", "config", "worker", "-l", "info"]
           envFrom:
             - configMapRef:
                 name: django-config
             - secretRef:
                 name: django-secret
-
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+              ephemeral-storage: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+              ephemeral-storage: "1Gi"

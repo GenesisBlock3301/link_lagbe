@@ -18,5 +18,5 @@ class TokenConstants:
         return cls.REFRESH_TOKEN_EXPIRY_DAYS_REMEMBER_ME if remember_me else cls.REFRESH_TOKEN_EXPIRY_DAYS
 
     @classmethod
-    def algorithm(cls):
+    def _algorithm(cls):
         return cls.ALGORITHM

@@ -23,7 +23,7 @@ class VerifyOTPSerializer(serializers.Serializer):
         otp = attrs.get('otp')
 
         if not User.objects.filter(email=email).exists():
-            raise serializers.ValidationError("Invalid email or OTP")
+            raise serializers.ValidationError("User with this email does not exist")
         cached_otp = cache.get(f"forgot_password_otp:{email}")
         if not cached_otp or cached_otp != otp:
             raise serializers.ValidationError("Invalid email or OTP")
